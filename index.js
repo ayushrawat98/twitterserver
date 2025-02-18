@@ -19,7 +19,7 @@ app.use(express.json())
 app.use('/auth', AuthRouter)
 app.use('/', PostRouter)
 app.get('*', (req, res, next) =>{
-    return res.sendFile(path.join(__dirname, 'public', 'angular', 'index.html'))
+    return res.sendFile(path.join(path.dirname(fileURLToPath(import.meta.url)), 'public', 'angular', 'index.html'))
 })
 
 
