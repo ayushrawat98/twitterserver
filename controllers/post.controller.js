@@ -95,25 +95,47 @@ export async function getUserPostById(req, res, next) {
         ]
     })
 
+    let deepPost = Post?.ParentPost
+    let holder = []
+    while(deepPost){
+        let deepPostJson = deepPost.toJSON()
+        deepPostJson.commentcount = await deepPost.countChildPosts()
+        holder.push(deepPostJson)
+        deepPost = await deepPost.getParentPost({
+            include : {
+                model : Users,
+                as : 'User'
+            }
+        })
+    }
+
     if (Post) {
         let jsonPost = Post.toJSON()
+        //set comment count for each child post
         let index = 0
         for (const element of Post.ChildPosts) {
             let count = await element.countChildPosts();
             jsonPost.ChildPosts[index++].commentcount = count
         }
-        if(Post.ParentPost){
-            let count = await Post.ParentPost.countChildPosts()
-            jsonPost.ParentPost.commentcount = count
-        }
+        // if(Post.ParentPost){
+        //     let count = await Post.ParentPost.countChildPosts()
+        //     jsonPost.ParentPost.commentcount = count
+        // }
+
+        //add array of parentposts
+        delete jsonPost['ParentPost']
+        jsonPost['ParentPosts'] = holder.reverse()
+
+        //count length of ChildPosts array 
         jsonPost.commentcount = jsonPost.ChildPosts.length
         return res.json(jsonPost)
     } else {
-        return res.json([])
+        return res.json(null)
     }
 }
 
 export async function addNewPost(req, res, next) {
+    console.log(req.body)
     if(req.body.parentpostid){
         let parentPost = await Posts.findByPk(req.body.parentpostid)
         if(!parentPost){
@@ -124,11 +146,13 @@ export async function addNewPost(req, res, next) {
         let newPost = await Posts.create({
             content: req.body.content,
             UserId: req.body.id,
-            parentpostid: req.body.parentpostid
+            parentpostid: req.body.parentpostid == 0 ? null : req.body.parentpostid,
+            media : req.file ? req.file.filename : null,
+            mediatype : req.file ? req.file.mimetype : null
         })
 
         await Hashs.create({ hash: req.hashed, PostId: newPost.id })
-        return res.json(newPost)
+        return res.json({message : 'success'})
     } catch (err) {
         res.status(500).json(err.message)
     }

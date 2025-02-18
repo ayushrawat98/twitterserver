@@ -23,6 +23,10 @@ export const Posts = sequelize.define(
             type : DataTypes.STRING,
             allowNull : true
         },
+        mediatype : {
+            type : DataTypes.STRING,
+            allowNull : true
+        },
         deleted : {
             type : DataTypes.BOOLEAN,
             allowNull : false,

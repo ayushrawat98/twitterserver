@@ -11,10 +11,9 @@ const app = express()
 sync()
 
 app.use(compression())
-if(process.env.NODE_ENV == 'development'){
-    app.use(cors())
-}
+// app.use(cors())
 app.use(express.static(path.join(path.dirname(fileURLToPath(import.meta.url)) , "public/angular")));
+app.use(express.static(path.join(path.dirname(fileURLToPath(import.meta.url)) , "public/files")));
 app.use(express.json())
 app.use('/server/auth', AuthRouter)
 app.use('/server/', PostRouter)
