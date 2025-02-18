@@ -3,6 +3,7 @@ import { sync } from "./models/sync.js"
 import { router as PostRouter } from './routes/post.route.js'
 import { router as AuthRouter } from './routes/auth.route.js'
 import cors from 'cors'
+import compression from "compression"
 
 const app = express()
 sync()
