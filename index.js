@@ -5,6 +5,7 @@ import { router as AuthRouter } from './routes/auth.route.js'
 import cors from 'cors'
 import compression from "compression"
 import path from 'path'
+import {fileURLToPath} from 'url'
 
 const app = express()
 sync()
@@ -13,7 +14,7 @@ app.use(compression())
 if(process.env.NODE_ENV == 'development'){
     app.use(cors())
 }
-app.use(express.static(path.join(import.meta.dirname , "public/angular")));
+app.use(express.static(path.join(path.dirname(fileURLToPath(import.meta.url)) , "public/angular")));
 app.use(express.json())
 app.use('/auth', AuthRouter)
 app.use('/', PostRouter)
