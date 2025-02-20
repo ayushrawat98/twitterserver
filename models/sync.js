@@ -2,6 +2,7 @@ import { sequelize } from "./sequelize.js";
 import { Users } from './user.model.js'
 import { Posts } from './post.model.js'
 import { Hashs } from "./hash.model.js";
+import { Likes } from "./like.model.js";
 
 Users.hasMany(Posts, {as : 'UserPosts', foreignKey : 'UserId', onDelete : 'CASCADE'})
 Posts.belongsTo(Users, {as : 'User', foreignKey : 'UserId'})
@@ -11,6 +12,9 @@ Posts.belongsTo(Posts, {as : 'ParentPost', foreignKey : 'parentpostid'})
 
 Posts.hasOne(Hashs, {as : 'PostHash', onDelete : 'CASCADE', foreignKey : 'PostId'})
 Hashs.belongsTo(Posts, {as : 'Hash', foreignKey : 'PostId'})
+
+Posts.belongsToMany(Users, {through : Likes, as : 'Likers', foreignKey : 'LikerUserId'})
+Users.belongsToMany(Posts, {through : Likes, as : 'LikedPosts', foreignKey : 'LikedPostId'})
 
 // await sequelize.sync({})
 
