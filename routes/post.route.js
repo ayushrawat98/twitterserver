@@ -10,7 +10,7 @@ router.get('/posts', PostController.getAllPosts)
 router.get('/:username/posts', PostController.getAllUserPosts)
 router.get('/:username/post/:id', PostController.getUserPostById)
 
-router.post('/post',upload.single('file'), compressImage, robot9000, PostController.addNewPost)
+router.post('/post',upload.single('file'), robot9000,  compressImage, PostController.addNewPost)
 router.post('/like', PostController.likePost)
 
 export { router }
