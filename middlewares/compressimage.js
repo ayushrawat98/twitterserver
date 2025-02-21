@@ -3,9 +3,8 @@ import fs from 'fs'
 
 export function compressImage(req, res, next) {
     if (req.file) {
-        let file = req.file
-        if (file.mimetype.includes('image') && file.mimetype != 'image/gif') {
-            sharp(fs.readFileSync('./public/files/' + file.filename)).jpeg({ quality: 70 }).toFile('./public/files/' + file.filename)
+        if (req.file.mimetype.includes('image') && req.file.mimetype != 'image/gif') {
+            sharp(fs.readFileSync('./public/files/' + req.file.filename)).jpeg({ quality: 50 }).toFile('./public/files/' + req.file.filename)
         }
     }
     next()

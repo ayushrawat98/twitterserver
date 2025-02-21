@@ -10,10 +10,10 @@ export const robot9000 = async (req, res, next) => {
         }
     })
     if(found){
-        //remove file if post is duplicate
-        // if(req.file){
-        //     fs.unlink('./public/files/' + file.filename, () => {})
-        // }
+        // remove file if post is duplicate
+        if(req.file){
+            fs.unlink('./public/files/' + req.file.filename, () => {})
+        }
         return res.status(400).json("Make an original post")
     }else{
         req.hashed = hashed

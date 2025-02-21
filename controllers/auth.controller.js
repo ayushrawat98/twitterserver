@@ -24,7 +24,7 @@ export async function registerUser(req, res, next) {
     let hashedPassword = await bcrypt.hash(req.body.password, 1)
 
     try {
-        let User = await Users.create({ username: req.body.username, displayname: req.body.displayname, password: hashedPassword });
+        let User = await Users.create({ username: req.body.username.toLowerCase(), displayname: req.body.displayname, password: hashedPassword });
         return res.status(200).json({ message: "Registered", token: generateToken({ id: User.id, username: User.username }) })
     } catch (err) {
         return res.status(500).json({ message: err.message })
