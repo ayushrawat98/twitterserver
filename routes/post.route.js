@@ -6,7 +6,7 @@ import { compressImage } from "../middlewares/compressimage.js";
 
 const router = Router()
 
-router.get('/posts', PostController.getAllPosts)
+router.get('/posts/:page', PostController.getAllPosts)
 router.get('/:username/posts', PostController.getAllUserPosts)
 router.get('/:username/post/:id', PostController.getUserPostById)
 

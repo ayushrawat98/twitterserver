@@ -4,6 +4,8 @@ import { Hashs } from "../models/hash.model.js"
 import { Likes } from "../models/like.model.js"
 
 export async function getAllPosts(req, res, next) {
+    let pageno = req.params.page
+    let offset = (pageno * 20)
 
     let result = await Posts.findAll({
         where: {
@@ -11,6 +13,7 @@ export async function getAllPosts(req, res, next) {
             parentpostid: null
         },
         limit: 20,
+        offset : offset,
         order: [['createdAt', 'DESC']],
         include: [{
             model: Users,
