@@ -21,6 +21,7 @@ export async function getAllPosts(req, res, next) {
         include: [{
             model: Users,
             as: 'User',
+            attributes : ['username', 'displayname', 'bio','id']
         },
         ]
     })
@@ -62,6 +63,7 @@ export async function getAllUserPosts(req, res, next) {
             include: {
                 model: Users,
                 as: 'User',
+                attributes : ['username', 'displayname', 'bio','id']
             }
         }
     })
@@ -99,11 +101,13 @@ export async function getUserPostById(req, res, next) {
             include: {
                 model: Users,
                 as: 'User',
+                attributes : ['username', 'displayname', 'bio','id']
             },
         },
         {
             model: Users,
             as: 'User',
+            attributes : ['username', 'displayname', 'bio','id']
         },
         {
             model: Posts,
@@ -111,6 +115,7 @@ export async function getUserPostById(req, res, next) {
             include: {
                 model: Users,
                 as: 'User',
+                attributes : ['username', 'displayname', 'bio','id']
             }
         }
         ]
