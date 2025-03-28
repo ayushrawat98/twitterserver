@@ -3,6 +3,9 @@ import { Users } from './user.model.js'
 import { Posts } from './post.model.js'
 import { Hashs } from "./hash.model.js";
 import { Likes } from "./like.model.js";
+import { Reposts } from "./repost.model.js";
+import { Bookmarks } from "./bookmark.model.js";
+import { Notifications } from "./notification.model.js";
 
 Users.hasMany(Posts, {as : 'UserPosts', foreignKey : 'UserId', onDelete : 'CASCADE'})
 Posts.belongsTo(Users, {as : 'User', foreignKey : 'UserId'})
@@ -13,8 +16,22 @@ Posts.belongsTo(Posts, {as : 'ParentPost', foreignKey : 'parentpostid'})
 Posts.hasOne(Hashs, {as : 'PostHash', onDelete : 'CASCADE', foreignKey : 'PostId'})
 Hashs.belongsTo(Posts, {as : 'Hash', foreignKey : 'PostId'})
 
-Posts.belongsToMany(Users, {through : Likes, as : 'Likers', foreignKey : 'LikerUserId'})
-Users.belongsToMany(Posts, {through : Likes, as : 'LikedPosts', foreignKey : 'LikedPostId'})
+/*
+Post "has many" Users who have liked it.
+When looking at a Post, you're interested in which users liked this post.
+The term Likers is used because you're looking at users who liked the post (the "likers" are users).
+*/
+Posts.belongsToMany(Users, {through : Likes, as : 'Likers', foreignKey : 'LikedPostId'})
+Users.belongsToMany(Posts, {through : Likes, as : 'LikedPosts', foreignKey : 'LikerUserId'})
+
+Posts.belongsToMany(Users, {through : Reposts, as : 'Reposters', foreignKey : 'RepostedId'})
+Users.belongsToMany(Posts, {through : Reposts, as : 'Reposted', foreignKey : 'ReposterId'})
+
+Posts.belongsToMany(Users, {through : Bookmarks, as : 'BookmarkUsers', foreignKey : 'BookmarkPostId'})
+Users.belongsToMany(Posts, {through : Bookmarks, as : 'BookmarkPosts', foreignKey : 'BookmarkUserId'})
+
+Users.hasMany(Notifications, {as : 'UserNotifications', foreignKey : 'NotifiedUserId', onDelete : 'CASCADE'})
+Notifications.belongsTo(Users, {foreignKey : 'NotifiedUserId'})
 
 // await sequelize.sync({})
 

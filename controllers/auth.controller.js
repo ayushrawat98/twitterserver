@@ -32,7 +32,7 @@ export async function registerUser(req, res, next) {
 }
 
 function generateToken(data) {
-    return jwt.sign(data, "test", { expiresIn: '12h' })
+    return jwt.sign(data, process.env.TOKEN_SECRET, { expiresIn: '12h' })
 }
 
 function notEmptyBody(req) {
