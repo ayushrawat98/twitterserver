@@ -96,12 +96,12 @@ export async function getUserPostById(req, res, next) {
         include: [{
             model: Posts,
             as: 'ChildPosts',
+            order: [['createdAt', 'DESC']],
             include: {
                 model: Users,
                 as: 'User',
                 attributes: ['username', 'displayname', 'bio', 'id']
             },
-            order: [['createdAt', 'DESC']],
         },
         {
             model: Users,
