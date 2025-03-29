@@ -45,8 +45,6 @@ export async function getAllPosts(req, res, next) {
     } else {
         return res.status(400).json([])
     }
-
-
 }
 
 export async function getAllUserPosts(req, res, next) {
@@ -195,7 +193,7 @@ export async function addNewPost(req, res, next) {
             mediatype: req.file ? req.file.mimetype : null
         })
 
-        if (req.body.parentpostid && req.user.id != req.body.touser.User.id) {
+        if (req.body.parentpostid) {
             let fromuser = await Users.findByPk(req.user.id)
             let touser = await Posts.findByPk(
                 req.body.parentpostid,
@@ -207,6 +205,7 @@ export async function addNewPost(req, res, next) {
                     }
                 }
             )
+            if(req.user.id == touser.User.id) return;
             let newnotification = await Notifications.create(
                 {
                     type: "reply",
@@ -353,7 +352,8 @@ export async function getNotifications(req, res, next) {
     let notif = await Notifications.findAll({
         where: {
             NotifiedUserId: req.user.id
-        }
+        },
+        order: [['createdAt', 'DESC']],
     })
 
     return res.json(notif)

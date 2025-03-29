@@ -13,6 +13,7 @@ router.post('/post/like', PostController.likePost)
 router.post('/post/repost', PostController.Repost)
 router.post('/post/bookmark', PostController.Bookmark)
 router.post('/post/:page', PostController.getAllPosts)
+//robot9000 after multer because we can't see the req.body until multer parse it
 router.post('/post',authenticateToken, upload.single('file'), robot9000,  compressImage, PostController.addNewPost)
 
 
