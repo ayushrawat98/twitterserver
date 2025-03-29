@@ -14,8 +14,8 @@ sync()
 
 app.use(compression())
 app.use(cors())
-app.use(express.static(path.join(path.dirname(fileURLToPath(import.meta.url)) , "public/angular")));
-app.use(express.static(path.join(path.dirname(fileURLToPath(import.meta.url)) , "public/files")));
+app.use(express.static(path.join(path.dirname(fileURLToPath(import.meta.url)) , "public/angular"), {cacheControl : true, maxAge : "1h"}));
+app.use(express.static(path.join(path.dirname(fileURLToPath(import.meta.url)) , "public/files"), {cacheControl : true, maxAge : "1h"}));
 app.use(express.json())
 app.use('/api/auth', AuthRouter)
 app.use('/api', PostRouter)

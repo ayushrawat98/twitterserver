@@ -101,6 +101,7 @@ export async function getUserPostById(req, res, next) {
                 as: 'User',
                 attributes: ['username', 'displayname', 'bio', 'id']
             },
+            order: [['createdAt', 'DESC']],
         },
         {
             model: Users,
