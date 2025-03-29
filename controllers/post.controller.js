@@ -21,7 +21,7 @@ export async function getAllPosts(req, res, next) {
         include: [{
             model: Users,
             as: 'User',
-            attributes : ['username', 'displayname', 'bio','id']
+            attributes: ['username', 'displayname', 'bio', 'id']
         },
         ]
     })
@@ -63,7 +63,7 @@ export async function getAllUserPosts(req, res, next) {
             include: {
                 model: Users,
                 as: 'User',
-                attributes : ['username', 'displayname', 'bio','id']
+                attributes: ['username', 'displayname', 'bio', 'id']
             }
         }
     })
@@ -101,13 +101,13 @@ export async function getUserPostById(req, res, next) {
             include: {
                 model: Users,
                 as: 'User',
-                attributes : ['username', 'displayname', 'bio','id']
+                attributes: ['username', 'displayname', 'bio', 'id']
             },
         },
         {
             model: Users,
             as: 'User',
-            attributes : ['username', 'displayname', 'bio','id']
+            attributes: ['username', 'displayname', 'bio', 'id']
         },
         {
             model: Posts,
@@ -115,7 +115,7 @@ export async function getUserPostById(req, res, next) {
             include: {
                 model: Users,
                 as: 'User',
-                attributes : ['username', 'displayname', 'bio','id']
+                attributes: ['username', 'displayname', 'bio', 'id']
             }
         }
         ]
@@ -195,7 +195,7 @@ export async function addNewPost(req, res, next) {
             mediatype: req.file ? req.file.mimetype : null
         })
 
-        if (req.body.parentpostid) {
+        if (req.body.parentpostid && req.user.id != req.body.touser.User.id) {
             let fromuser = await Users.findByPk(req.user.id)
             let touser = await Posts.findByPk(
                 req.body.parentpostid,
@@ -210,11 +210,11 @@ export async function addNewPost(req, res, next) {
             let newnotification = await Notifications.create(
                 {
                     type: "reply",
-                    message: `${fromuser.username} replied ${newPost.content.slice(0,50)}...`,
+                    message: `${fromuser.username} replied ${newPost.content.slice(0, 50)}...`,
                     isRead: false,
                     NotifiedUserId: touser.User.id,
-                    postId : req.body.parentpostid,
-                    fromUserId : req.user.id
+                    postId: req.body.parentpostid,
+                    fromUserId: req.user.id
                 }
             )
         }
@@ -239,14 +239,14 @@ export async function likePost(req, res, next) {
     if (likeExist) {
         await likeExist.destroy()
         let oldnotif = await Notifications.findOne({
-            where : {
-                fromUserId : req.body.userid,
+            where: {
+                fromUserId: req.body.userid,
                 NotifiedUserId: req.body.receiverid,
-                postId : req.body.postid,
-                type : "like"
+                postId: req.body.postid,
+                type: "like"
             }
         })
-        if(oldnotif){
+        if (oldnotif) {
             await oldnotif.destroy()
         }
         return res.json("success")
@@ -259,17 +259,19 @@ export async function likePost(req, res, next) {
     })
 
     //create like notification
-    let fromuser = await Users.findByPk(req.body.userid)
-    let newnotification = await Notifications.create(
-        {
-            type: "like",
-            message: `${fromuser.username} liked your post`,
-            isRead: false,
-            NotifiedUserId: req.body.receiverid,
-            postId : req.body.postid,
-            fromUserId : req.body.userid
-        }
-    )
+    if (req.body.userid != req.body.receiverid) {
+        let fromuser = await Users.findByPk(req.body.userid)
+        let newnotification = await Notifications.create(
+            {
+                type: "like",
+                message: `${fromuser.username} liked your post`,
+                isRead: false,
+                NotifiedUserId: req.body.receiverid,
+                postId: req.body.postid,
+                fromUserId: req.body.userid
+            }
+        )
+    }
 
     return res.json("success")
 }
@@ -287,15 +289,15 @@ export async function Repost(req, res, next) {
     if (repostExist) {
         await repostExist.destroy()
         let oldnotif = await Notifications.findOne({
-            where : {
-                fromUserId : req.body.userid,
+            where: {
+                fromUserId: req.body.userid,
                 NotifiedUserId: req.body.receiverid,
-                postId : req.body.postid,
-                type : "repost"
+                postId: req.body.postid,
+                type: "repost"
             }
         })
-        if(oldnotif){
-           await oldnotif.destroy()
+        if (oldnotif) {
+            await oldnotif.destroy()
         }
         return res.json("success")
     }
@@ -307,17 +309,19 @@ export async function Repost(req, res, next) {
     })
 
     //create like notification
-    let fromuser = await Users.findByPk(req.body.userid)
-    let newnotification = await Notifications.create(
-        {
-            type: "repost",
-            message: `${fromuser.username} reposted your post`,
-            isRead: false,
-            NotifiedUserId: req.body.receiverid,
-            postId : req.body.postid,
-            fromUserId : req.body.userid
-        }
-    )
+    if (req.body.userid != req.body.receiverid) {
+        let fromuser = await Users.findByPk(req.body.userid)
+        let newnotification = await Notifications.create(
+            {
+                type: "repost",
+                message: `${fromuser.username} reposted your post`,
+                isRead: false,
+                NotifiedUserId: req.body.receiverid,
+                postId: req.body.postid,
+                fromUserId: req.body.userid
+            }
+        )
+    }
 
     return res.json("success")
 }
@@ -347,8 +351,8 @@ export async function Bookmark(req, res, next) {
 
 export async function getNotifications(req, res, next) {
     let notif = await Notifications.findAll({
-        where : {
-            NotifiedUserId : req.user.id
+        where: {
+            NotifiedUserId: req.user.id
         }
     })
 
