@@ -356,6 +356,7 @@ export async function getNotifications(req, res, next) {
             NotifiedUserId: req.user.id
         },
         order: [['createdAt', 'DESC']],
+        limit : 20
     })
 
     return res.json(notif)
