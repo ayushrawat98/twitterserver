@@ -177,15 +177,14 @@ export async function getUserPostById(req, res, next) {
 }
 
 export async function addNewPost(req, res, next) {
-    if (req.body.parentpostid) {
-        let parentPost = await Posts.findByPk(req.body.parentpostid)
-        if (!parentPost) {
-            return res.status(404).json({ message: "Parent post doesn't exist" })
-        }
-    }
-
     try {
-        console.log(req.user)
+        if (req.body.parentpostid) {
+            let parentPost = await Posts.findByPk(req.body.parentpostid)
+            if (!parentPost) {
+                return res.status(404).json({ message: "Parent post doesn't exist" })
+            }
+        }
+        
         let newPost = await Posts.create({
             content: req.body.content,
             UserId: req.user.id,
@@ -206,14 +205,16 @@ export async function addNewPost(req, res, next) {
                     }
                 }
             )
-            if(req.user.id == touser.User.id) return;
+            //dont create notification on reply from the OP himself
+            if(req.user.id == touser.User.id) return res.json({ message: 'success' });
+
             let newnotification = await Notifications.create(
                 {
                     type: "reply",
                     message: `${fromuser.username} replied ${newPost.content.slice(0, 50)}...`,
                     isRead: false,
                     NotifiedUserId: touser.User.id,
-                    postId: req.body.parentpostid,
+                    postId: newPost.id,
                     fromUserId: req.user.id
                 }
             )
