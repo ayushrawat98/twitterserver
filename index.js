@@ -29,7 +29,7 @@ app.get('*', (req, res, next) =>{
 //start server
 if (process.env.NODE_ENV === 'development') {
     // create server local
-    app.listen(80, (ex) => {
+    app.listen(3000, (ex) => {
         console.log(process.env.PORT)
     })
 } else if (process.env.NODE_ENV === 'production') {
