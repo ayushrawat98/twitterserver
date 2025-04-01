@@ -69,4 +69,6 @@ Notifications.belongsTo(Users, {foreignKey : 'NotifiedUserId'})
 
 export const sync = async () => {
     await sequelize.sync({})
+    let a = await Posts.findByPk(92)
+    await a.destroy()
 }
