@@ -229,7 +229,9 @@ export async function addNewPost(req, res, next) {
                 let text = ''
                 if (parentPost == null) {
                     text = req.body.content
-                } else {
+                } else if(parentPost.id == 24) {
+                    text = `@aloo : ${parentPost.content}\n${req.body.content}`
+                }else{
                     text = `${parentPost.content}\n${req.body.content}`
                 }
 
