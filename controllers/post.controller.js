@@ -5,6 +5,7 @@ import { Likes } from "../models/like.model.js"
 import { Reposts } from "../models/repost.model.js"
 import { Bookmarks } from "../models/bookmark.model.js"
 import { Notifications } from "../models/notification.model.js"
+import { getGeminiResponse } from "../helper/gemini.js"
 
 export async function getAllPosts(req, res, next) {
     let pageno = req.params.page
@@ -178,13 +179,20 @@ export async function getUserPostById(req, res, next) {
 
 export async function addNewPost(req, res, next) {
     try {
+        let parentPost = null
         if (req.body.parentpostid) {
-            let parentPost = await Posts.findByPk(req.body.parentpostid)
+            parentPost = await Posts.findByPk(req.body.parentpostid, {
+                include: {
+                    model: Users,
+                    as: 'User',
+                    attributes: ['id', 'username']
+                }
+            })
             if (!parentPost) {
                 return res.status(404).json({ message: "Parent post doesn't exist" })
             }
         }
-        
+
         let newPost = await Posts.create({
             content: req.body.content,
             UserId: req.user.id,
@@ -193,35 +201,51 @@ export async function addNewPost(req, res, next) {
             mediatype: req.file ? req.file.mimetype : null
         })
 
+
+        //create notification
         if (req.body.parentpostid) {
             let fromuser = await Users.findByPk(req.user.id)
-            let touser = await Posts.findByPk(
-                req.body.parentpostid,
-                {
-                    include: {
-                        model: Users,
-                        as: 'User',
-                        attributes: ['id']
-                    }
-                }
-            )
             //dont create notification on reply from the OP himself
-            if(req.user.id == touser.User.id) return res.json({ message: 'success' });
-
-            let newnotification = await Notifications.create(
-                {
-                    type: "reply",
-                    message: `${fromuser.username} replied ${newPost.content.slice(0, 50)}...`,
-                    isRead: false,
-                    NotifiedUserId: touser.User.id,
-                    postId: newPost.id,
-                    fromUserId: req.user.id
-                }
-            )
+            if (req.user.id != parentPost.User.id) {
+                let newnotification = await Notifications.create(
+                    {
+                        type: "reply",
+                        message: `${fromuser.username} replied ${req.body.content.slice(0, 50)}...`,
+                        isRead: false,
+                        NotifiedUserId: parentPost.User.id,
+                        postId: newPost.id,
+                        fromUserId: req.user.id
+                    }
+                )
+            }
         }
 
+        //save hash of the post
         await Hashs.create({ hash: req.hashed, PostId: newPost.id })
+
+        setTimeout(async () => {
+            //check if text has tagged AI
+            if (req.body.content.includes("@aloo")) {
+                let text = ''
+                if (parentPost == null) {
+                    text = req.body.content
+                } else {
+                    text = `${parentPost.content}\n${req.body.content}`
+                }
+
+                await Posts.create({
+                    content: await getGeminiResponse(text),
+                    UserId: 4, //set to 24
+                    parentpostid: newPost.id,
+                    media: null,
+                    mediatype: null
+                })
+            }
+        }, 100);
+
+        //return success
         return res.json({ message: 'success' })
+
     } catch (err) {
         res.status(500).json(err.message)
     }
@@ -356,7 +380,7 @@ export async function getNotifications(req, res, next) {
             NotifiedUserId: req.user.id
         },
         order: [['createdAt', 'DESC']],
-        limit : 20
+        limit: 20
     })
 
     return res.json(notif)
@@ -378,4 +402,6 @@ async function postDetailer(post, req) {
     }
     return [likecount, commentcount, repostcount, bookmarkcount, liked, reposted, bookmarked]
 }
+
+
 
