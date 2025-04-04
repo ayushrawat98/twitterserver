@@ -235,7 +235,7 @@ export async function addNewPost(req, res, next) {
 
                 await Posts.create({
                     content: await getGeminiResponse(text),
-                    UserId: 4, //set to 24
+                    UserId: 24, //set to 24 for prod , 4 for local
                     parentpostid: newPost.id,
                     media: null,
                     mediatype: null
