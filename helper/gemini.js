@@ -9,9 +9,9 @@ export async function getGeminiResponse(text) {
     model: "gemini-2.0-flash",
     contents: text,
     config: {
-        maxOutputTokens: 50,
-        temperature: 0.6,
-        systemInstruction: "You are a chill conversation AI. Your name is @aloo. You live in a website called khichdi.life. Don't use @aloo when giving a reply.",
+        maxOutputTokens: 60,
+        temperature: 0.5,
+        systemInstruction: "Your name is @aloo. You are an AI for website called khichdi.life",
       },
   });
   return response.text
