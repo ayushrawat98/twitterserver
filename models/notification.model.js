@@ -19,14 +19,29 @@ export const Notifications = sequelize.define(
             type: DataTypes.BOOLEAN,
             defaultValue: false,
         },
-        //on which the action happens
-        postId : {
-            type : DataTypes.INTEGER,
-            allowNull : false
+        NotifiedUserId : {
+            type: DataTypes.INTEGER,
+            allowNull : false,
+            references : {
+                model : 'Users',
+                key : 'id'
+            }
         },
-        fromUserId : {
-            type : DataTypes.INTEGER,
-            allowNull : false
+        NotifierUserId : {
+            type: DataTypes.INTEGER,
+            allowNull : true,
+            references : {
+                model : 'Users',
+                key : 'id'
+            }
+        },
+        NotifPostId : {
+            type: DataTypes.INTEGER,
+            allowNull : true,
+            references : {
+                model : 'Posts',
+                key : 'id'
+            }
         }
     }
 )

@@ -6,14 +6,15 @@ import { Likes } from "./like.model.js";
 import { Reposts } from "./repost.model.js";
 import { Bookmarks } from "./bookmark.model.js";
 import { Notifications } from "./notification.model.js";
+import bcrypt from "bcrypt"
 
 Users.hasMany(Posts, {as : 'UserPosts', foreignKey : 'UserId', onDelete : 'CASCADE'})
 Posts.belongsTo(Users, {as : 'User', foreignKey : 'UserId'})
 
-Posts.hasMany(Posts, {as : 'ChildPosts', foreignKey : 'parentpostid'})
+Posts.hasMany(Posts, {as : 'ChildPosts', foreignKey : 'parentpostid', onDelete : 'CASCADE'})
 Posts.belongsTo(Posts, {as : 'ParentPost', foreignKey : 'parentpostid'})
 
-Posts.hasOne(Hashs, {as : 'PostHash', onDelete : 'CASCADE', foreignKey : 'PostId'})
+Posts.hasOne(Hashs, {as : 'PostHash', foreignKey : 'PostId', onDelete : 'CASCADE'})
 Hashs.belongsTo(Posts, {as : 'Hash', foreignKey : 'PostId'})
 
 /*
@@ -32,6 +33,12 @@ Users.belongsToMany(Posts, {through : Bookmarks, as : 'BookmarkPosts', foreignKe
 
 Users.hasMany(Notifications, {as : 'UserNotifications', foreignKey : 'NotifiedUserId', onDelete : 'CASCADE'})
 Notifications.belongsTo(Users, {foreignKey : 'NotifiedUserId'})
+
+Users.hasMany(Notifications, {as : 'CreatedNotifications', foreignKey : 'NotifierUserId', onDelete : 'CASCADE'})
+Notifications.belongsTo(Users, {foreignKey : 'NotifierUserId'})
+
+Posts.hasMany(Notifications, {as : 'PostNotifications', foreignKey : 'NotifPostId', onDelete : 'CASCADE'})
+Notifications.belongsTo(Users, {foreignKey : 'NotifPostId'})
 
 // await sequelize.sync({})
 
@@ -69,9 +76,17 @@ Notifications.belongsTo(Users, {foreignKey : 'NotifiedUserId'})
 
 export const sync = async () => {
     await sequelize.sync({})
-    // for(let a of [219,220]){
-    //   let b =  await Posts.findByPk(a)
-    // await b.destroy()
-    // }
+
+    //create aloo
+    let aloo = await Users.findOne({
+        where : {
+            username : 'aloo'
+        }
+    })
+
+    if(!aloo){
+        let hashedPassword = await bcrypt.hash('abeyaar', 1)
+        await Users.create({ username: 'aloo', displayname: 'aloo', password: hashedPassword });
+    }
 
 }

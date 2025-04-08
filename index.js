@@ -2,7 +2,7 @@ import express from "express"
 import { sync } from "./models/sync.js"
 import { router as PostRouter } from './routes/post.route.js'
 import { router as AuthRouter } from './routes/auth.route.js'
-// import { router as UserRouter } from './routes/user.route.js'
+import { router as UserRouter } from './routes/user.route.js'
 import cors from 'cors'
 import compression from "compression"
 import path from 'path'
@@ -31,8 +31,8 @@ app.use(express.static(path.join(path.dirname(fileURLToPath(import.meta.url)), "
 app.use(express.static(path.join(path.dirname(fileURLToPath(import.meta.url)), "public/files"), { cacheControl: true, maxAge: "1h" }));
 app.use(express.json())
 app.use('/api/auth', AuthRouter)
-app.use('/api', PostRouter)
-// app.use('/api/user', UserRouter)
+app.use('/api/post', PostRouter)
+app.use('/api/user', UserRouter)
 app.get('*', (req, res, next) => {
     return res.sendFile(path.join(path.dirname(fileURLToPath(import.meta.url)), 'public', 'angular', 'browser', 'index.html'))
 })

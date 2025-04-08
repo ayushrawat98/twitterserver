@@ -5,10 +5,10 @@ export const Posts = sequelize.define(
     'Posts',
     {
         content: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: false,
             validate:{
-                len : {args : [1,255], msg : 'Should to 1-255 character long'}
+                len : {args : [1,1200], msg : 'Should to 1-1200 character long'}
             },
         },
         parentpostid : {

@@ -8,7 +8,7 @@ import { Notifications } from "../models/notification.model.js"
 import { getGeminiResponse } from "../helper/gemini.js"
 
 export async function getAllPosts(req, res, next) {
-    let pageno = req.params.page
+    let pageno = req.query.page
     let offset = (pageno * 20)
 
     let result = await Posts.findAll({
@@ -22,7 +22,7 @@ export async function getAllPosts(req, res, next) {
         include: [{
             model: Users,
             as: 'User',
-            attributes: ['username', 'displayname', 'bio', 'id']
+            attributes: ['username', 'displayname', 'bio', 'id', 'profilepicture']
         },
         ]
     })
@@ -32,7 +32,7 @@ export async function getAllPosts(req, res, next) {
         let resultJson = result.map(x => x.toJSON())
         let index = 0
         for (let x of result) {
-            let [likecount, commentcount, repostcount, bookmarkcount, liked, reposted, bookmarked] = await postDetailer(x, req)
+            let [likecount, commentcount, repostcount, bookmarkcount, liked, reposted, bookmarked] = await postDetailer(x, { body: { id: req.user?.id } })
             resultJson[index].likecount = likecount
             resultJson[index].commentcount = commentcount
             resultJson[index].liked = liked
@@ -49,7 +49,6 @@ export async function getAllPosts(req, res, next) {
 }
 
 export async function getAllUserPosts(req, res, next) {
-    console.log(req.body)
     let User = await Users.findOne({
         where: {
             username: req.params.username
@@ -62,7 +61,7 @@ export async function getAllUserPosts(req, res, next) {
             include: {
                 model: Users,
                 as: 'User',
-                attributes: ['username', 'displayname', 'bio', 'id']
+                attributes: ['username', 'displayname', 'bio', 'id', 'profilepicture']
             }
         }
     })
@@ -71,7 +70,7 @@ export async function getAllUserPosts(req, res, next) {
         let jsonUserPosts = User.toJSON().UserPosts
         let index = 0
         for (const element of User.UserPosts) {
-            let [likecount, commentcount, repostcount, bookmarkcount, liked, reposted, bookmarked] = await postDetailer(element, req)
+            let [likecount, commentcount, repostcount, bookmarkcount, liked, reposted, bookmarked] = await postDetailer(element, { body: { id: req.user?.id } })
             jsonUserPosts[index].commentcount = commentcount
             jsonUserPosts[index].likecount = likecount
             jsonUserPosts[index].repostcount = repostcount
@@ -88,7 +87,7 @@ export async function getAllUserPosts(req, res, next) {
 
 }
 
-export async function getUserPostById(req, res, next) {
+export async function getPostById(req, res, next) {
     //todo : check the req.body.username matches
     let Post = await Posts.findOne({
         where: {
@@ -101,13 +100,13 @@ export async function getUserPostById(req, res, next) {
             include: {
                 model: Users,
                 as: 'User',
-                attributes: ['username', 'displayname', 'bio', 'id']
+                attributes: ['username', 'displayname', 'bio', 'id', 'profilepicture']
             },
         },
         {
             model: Users,
             as: 'User',
-            attributes: ['username', 'displayname', 'bio', 'id']
+            attributes: ['username', 'displayname', 'bio', 'id', 'profilepicture']
         },
         {
             model: Posts,
@@ -115,7 +114,7 @@ export async function getUserPostById(req, res, next) {
             include: {
                 model: Users,
                 as: 'User',
-                attributes: ['username', 'displayname', 'bio', 'id']
+                attributes: ['username', 'displayname', 'bio', 'id', 'profilepicture']
             }
         }
         ]
@@ -125,7 +124,7 @@ export async function getUserPostById(req, res, next) {
     let holder = []
     while (deepPost) {
         let deepPostJson = deepPost.toJSON()
-        let [likecount, commentcount, repostcount, bookmarkcount, liked, reposted, bookmarked] = await postDetailer(deepPost, req)
+        let [likecount, commentcount, repostcount, bookmarkcount, liked, reposted, bookmarked] = await postDetailer(deepPost, { body: { id: req.user?.id } })
         deepPostJson.commentcount = commentcount
         deepPostJson.likecount = likecount
         deepPostJson.repostcount = repostcount
@@ -147,7 +146,7 @@ export async function getUserPostById(req, res, next) {
         //set comment count for each child post
         let index = 0
         for (const element of Post.ChildPosts) {
-            let [likecount, commentcount, repostcount, bookmarkcount, liked, reposted, bookmarked] = await postDetailer(element, req)
+            let [likecount, commentcount, repostcount, bookmarkcount, liked, reposted, bookmarked] = await postDetailer(element, { body: { id: req.user?.id } })
             jsonPost.ChildPosts[index].commentcount = commentcount
             jsonPost.ChildPosts[index].likecount = likecount
             jsonPost.ChildPosts[index].repostcount = repostcount
@@ -163,7 +162,7 @@ export async function getUserPostById(req, res, next) {
 
         //count length of ChildPosts array 
         // jsonPost.commentcount = jsonPost.ChildPosts.length
-        let [likecount, commentcount, repostcount, bookmarkcount, liked, reposted, bookmarked] = await postDetailer(Post, req)
+        let [likecount, commentcount, repostcount, bookmarkcount, liked, reposted, bookmarked] = await postDetailer(Post, { body: { id: req.user?.id } })
         jsonPost.likecount = likecount
         jsonPost.commentcount = commentcount
         jsonPost.repostcount = repostcount
@@ -201,22 +200,25 @@ export async function addNewPost(req, res, next) {
             mediatype: req.file ? req.file.mimetype : null
         })
 
-
         //create notification
-        if (req.body.parentpostid) {
+        //only when there is a parent and that parent is not @aloo bot
+        if (req.body.parentpostid && parentPost.User.id != 1) {
             let fromuser = await Users.findByPk(req.user.id)
+
             //dont create notification on reply from the OP himself
             if (req.user.id != parentPost.User.id) {
+
                 let newnotification = await Notifications.create(
                     {
                         type: "reply",
                         message: `${fromuser.username} replied ${req.body.content.slice(0, 50)}...`,
                         isRead: false,
                         NotifiedUserId: parentPost.User.id,
-                        postId: newPost.id,
-                        fromUserId: req.user.id
+                        NotifPostId: newPost.id,
+                        NotifierUserId: req.user.id
                     }
                 )
+
             }
         }
 
@@ -224,20 +226,20 @@ export async function addNewPost(req, res, next) {
         await Hashs.create({ hash: req.hashed, PostId: newPost.id })
 
         setTimeout(async () => {
-            //check if text has tagged AI
-            if (req.body.content.includes("@aloo")) {
+            //check if text has tagged AI or replying to ai
+            if (req.body.content.includes("@aloo") || (parentPost && parentPost.User.id == 1)) {
                 let text = ''
                 if (parentPost == null) {
                     text = req.body.content
-                } else if(parentPost.id == 24) {
+                } else if (parentPost.id == 1) {
                     text = `You posted this = ${parentPost.content}\n. Someone replied to you with this = ${req.body.content}. Write your reply.`
-                }else{
+                } else {
                     text = `Someone posted this = ${parentPost.content}.\n Now someone else is asking you this = ${req.body.content}. Write your reply.`
                 }
 
                 await Posts.create({
                     content: await getGeminiResponse(text),
-                    UserId: 24, //set to 24 for prod , 4 for local
+                    UserId: 1, //set to 24 for prod , 4 for local
                     parentpostid: newPost.id,
                     media: null,
                     mediatype: null
@@ -267,9 +269,9 @@ export async function likePost(req, res, next) {
         await likeExist.destroy()
         let oldnotif = await Notifications.findOne({
             where: {
-                fromUserId: req.body.userid,
+                NotifierUserId: req.body.userid,
                 NotifiedUserId: req.body.receiverid,
-                postId: req.body.postid,
+                NotifPostId: req.body.postid,
                 type: "like"
             }
         })
@@ -294,8 +296,8 @@ export async function likePost(req, res, next) {
                 message: `${fromuser.username} liked your post`,
                 isRead: false,
                 NotifiedUserId: req.body.receiverid,
-                postId: req.body.postid,
-                fromUserId: req.body.userid
+                NotifPostId: req.body.postid,
+                NotifierUserId: req.body.userid
             }
         )
     }
@@ -317,9 +319,9 @@ export async function Repost(req, res, next) {
         await repostExist.destroy()
         let oldnotif = await Notifications.findOne({
             where: {
-                fromUserId: req.body.userid,
+                NotifierUserId: req.body.userid,
                 NotifiedUserId: req.body.receiverid,
-                postId: req.body.postid,
+                NotifPostId: req.body.postid,
                 type: "repost"
             }
         })
@@ -344,8 +346,8 @@ export async function Repost(req, res, next) {
                 message: `${fromuser.username} reposted your post`,
                 isRead: false,
                 NotifiedUserId: req.body.receiverid,
-                postId: req.body.postid,
-                fromUserId: req.body.userid
+                NotifPostId: req.body.postid,
+                NotifierUserId: req.body.userid
             }
         )
     }
@@ -376,17 +378,19 @@ export async function Bookmark(req, res, next) {
     return res.json("success")
 }
 
-export async function getNotifications(req, res, next) {
-    let notif = await Notifications.findAll({
-        where: {
-            NotifiedUserId: req.user.id
-        },
-        order: [['createdAt', 'DESC']],
-        limit: 20
-    })
 
-    return res.json(notif)
+
+export async function deletePost(req, res, next) {
+    if (process.env.DELETE_KEY == req.query.key) {
+        let post = await Posts.findByPk(req.query.id)
+        await post.destroy()
+        return res.json("success")
+    }else{
+        return res.json("failed")
+    }
 }
+
+
 
 // helper functions
 async function postDetailer(post, req) {

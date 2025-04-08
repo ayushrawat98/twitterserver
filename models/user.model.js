@@ -33,10 +33,10 @@ export const Users = sequelize.define(
                 len : {args : [0,255], msg : "Bio should be 0-201 character long"},
             },
         },
-        // profile_picture : {
-        //     type : DataTypes.STRING,
-        //     allowNull : true,
-        //     defaultValue : '/profile/defaultimage.jpeg'
-        // }
+        profilepicture : {
+            type : DataTypes.TEXT,
+            allowNull : true,
+            defaultValue : null
+        }
     }
 )
