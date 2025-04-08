@@ -12,7 +12,7 @@ export async function deleteUser(req, res, next) {
         let post = await Users.findByPk(req.query.id)
         await post.destroy()
         return res.json("success")
-    }else{
+    } else {
         return res.json("failed")
     }
 }
@@ -31,23 +31,29 @@ export async function getNotifications(req, res, next) {
 
 export async function addUserDetails(req, res, next) {
     let user = await Users.findByPk(req.user.id)
-    console.log(req.body)
-    user.set({
-        displayname : req.body.displayname,
-        bio : req.body.bio == "null" ? null : req.body.bio,
-        profilepicture : req.file.filename
-    })
+    if (req.file) {
+        user.set({
+            displayname: req.body.displayname,
+            bio: req.body.bio == "null" ? null : req.body.bio,
+            profilepicture: req.file.filename
+        })
+    } else {
+        user.set({
+            displayname: req.body.displayname,
+            bio: req.body.bio == "null" ? null : req.body.bio,
+        })
+    }
     await user.save()
-    return res.json({bio : user.bio, profilepicture : user.profilepicture, displayname : user.displayname, username : user.username})
+    return res.json({ bio: user.bio, profilepicture: user.profilepicture, displayname: user.displayname, username: user.username })
 
 }
 
 export async function getUserDetails(req, res, next) {
     let userDetails = await Users.findOne({
-        where :{
-            username : req.params.username
+        where: {
+            username: req.params.username
         },
-        attributes : ['bio','profilepicture', 'displayname','username']
+        attributes: ['bio', 'profilepicture', 'displayname', 'username']
     })
     return res.json(userDetails)
 }

@@ -89,4 +89,14 @@ export const sync = async () => {
         await Users.create({ username: 'aloo', displayname: 'aloo', password: hashedPassword });
     }
 
+    let user = await Users.findOne({
+        where : {
+            username : 'skibidi'
+        }
+    })
+    user.set({
+        bio : "Time to run wild and leave a sexy corpse"
+    })
+    await user.save()
+
 }
