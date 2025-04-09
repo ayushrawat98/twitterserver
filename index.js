@@ -11,6 +11,7 @@ import dotenv from 'dotenv'
 import https from 'https'
 import fs from 'fs'
 import helmet from 'helmet'
+import http2 from 'http2'
 
 const app = express()
 dotenv.config()
@@ -49,7 +50,10 @@ if (process.env.NODE_ENV === 'development') {
         key: fs.readFileSync('/etc/letsencrypt/live/khichdi.life/privkey.pem'),
         cert: fs.readFileSync('/etc/letsencrypt/live/khichdi.life/fullchain.pem')
     };
-    https.createServer(options, app).listen(443, () => {
+    http2.createSecureServer(options, app).listen(443, () => {
         console.log('API server running on https://khichdi.life');
-    });
+    })
+    // https.createServer(options, app).listen(443, () => {
+    //     console.log('API server running on https://khichdi.life');
+    // });
 }
