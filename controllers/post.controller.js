@@ -192,6 +192,10 @@ export async function addNewPost(req, res, next) {
             }
         }
 
+        if(req.body.content.length > 1200){
+            throw new Error('Max length exceeded.')
+        }
+
         let newPost = await Posts.create({
             content: req.body.content,
             UserId: req.user.id,
