@@ -8,7 +8,7 @@ export const Posts = sequelize.define(
             type: DataTypes.TEXT,
             allowNull: false,
             validate:{
-                len : {args : [1,1200], msg : 'Should to 1-1200 character long'}
+                len : {args : [1,1600], msg : 'Should be 1-1600 character long'}
             },
         },
         parentpostid : {
