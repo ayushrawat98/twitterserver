@@ -53,7 +53,7 @@ export async function getUserDetails(req, res, next) {
         where: {
             username: req.params.username
         },
-        attributes: ['bio', 'profilepicture', 'displayname', 'username']
+        attributes: ['bio', 'profilepicture', 'displayname', 'username', 'id']
     })
     return res.json(userDetails)
 }
