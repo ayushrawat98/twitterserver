@@ -39,18 +39,19 @@ app.get('*', (req, res, next) => {
 
 
 //start server
-if (process.env.NODE_ENV === 'development') {
+// if (process.env.NODE_ENV === 'development') {
     // create server local
     app.listen(3000, (ex) => {
         console.log(process.env.PORT)
     })
-} else if (process.env.NODE_ENV === 'production') {
-    const options = {
-        key: fs.readFileSync('/etc/letsencrypt/live/khichdi.life/privkey.pem'),
-        cert: fs.readFileSync('/etc/letsencrypt/live/khichdi.life/fullchain.pem')
-    };
+// }
+// } else if (process.env.NODE_ENV === 'production') {
+//     const options = {
+//         key: fs.readFileSync('/etc/letsencrypt/live/khichdi.life/privkey.pem'),
+//         cert: fs.readFileSync('/etc/letsencrypt/live/khichdi.life/fullchain.pem')
+//     };
 
-    https.createServer(options, app).listen(443, () => {
-        console.log('API server running on https://khichdi.life');
-    });
-}
+//     https.createServer(options, app).listen(443, () => {
+//         console.log('API server running on https://khichdi.life');
+//     });
+// }
