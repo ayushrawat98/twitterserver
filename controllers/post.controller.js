@@ -230,8 +230,8 @@ export async function addNewPost(req, res, next) {
         await Hashs.create({ hash: req.hashed, PostId: newPost.id })
 
         setTimeout(async () => {
-            //check if text has tagged AI or replying to ai
-            if (req.body.content.includes("@aloo") || (parentPost && parentPost.User.id == 1)) {
+            //check if user created a new post or text has tagged AI or replying to ai
+            if (parentPost == null ||  req.body.content.includes("@aloo") || (parentPost && parentPost.User.id == 1)) {
                 let text = ''
                 if (parentPost == null) {
                     text = req.body.content

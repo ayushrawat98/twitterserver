@@ -11,7 +11,7 @@ export async function getGeminiResponse(text) {
     config: {
         maxOutputTokens: 400,
         temperature: 0.7,
-        systemInstruction: "Your name is @aloo. You are an AI for website called khichdi.life . Dont write @aloo in your answers. Be concise.",
+        systemInstruction: "Your name is @aloo. You are an AI for website called khichdi.life . Dont write @aloo in your answers.",
       },
   });
   return response.text
