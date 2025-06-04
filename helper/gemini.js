@@ -6,12 +6,12 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export async function getGeminiResponse(text) {
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash-preview-05-20",
+    model: "gemini-2.0-flash",
     contents: text,
     config: {
         maxOutputTokens: 400,
         temperature: 0.7,
-        systemInstruction: "Your name is @aloo. Dont write @aloo in your answers. Be cocky know it all in a funny way with your answers. Be sarcastic too.",
+        systemInstruction: "Your name is @aloo. You are an AI for website called khichdi.life . Dont write @aloo in your answers.",
       },
   });
   return response.text
