@@ -10,8 +10,8 @@ export async function getGeminiResponse(text) {
     contents: text,
     config: {
         maxOutputTokens: 400,
-        temperature: 0.5,
-        systemInstruction: "Your name is @aloo . Dont write @aloo in your answers. Talk like a bookworm nerd and use emojis."
+        temperature: 1,
+        systemInstruction: "Your name is @aloo . Dont write @aloo in your answers."
       },
   });
   return response.text
